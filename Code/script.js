@@ -13,8 +13,8 @@ window.addEventListener('DOMContentLoaded', (event) => {
     let tutorial_canvas = document.getElementById("tutorial")
     let tutorial_canvas_context = tutorial_canvas.getContext('2d')
 
-    tutorial_canvas.width = document.documentElement.clientWidth
-    tutorial_canvas.height = document.documentElement.clientHeight
+    tutorial_canvas.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
+    tutorial_canvas.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
 
     let grid_width = 50
     let grid_height = 50
@@ -53,7 +53,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
         draw(){
             tutorial_canvas_context.lineWidth = 1
             tutorial_canvas_context.fillStyle = this.color
-            tutorial_canvas_context.strokeStyle = "red"
+            tutorial_canvas_context.strokeStyle = "yellow"
             tutorial_canvas_context.fillRect(this.x, this.y, this.width, this.height)
             tutorial_canvas_context.strokeRect(this.x, this.y, this.width, this.height)
         }
