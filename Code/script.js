@@ -76,12 +76,12 @@ window.addEventListener('DOMContentLoaded', (event) => {
         }
 
         draw(){
-            tutorial_canvas_context.lineWidth = 0
+            tutorial_canvas_context.lineWidth = 4 //Change stroke width
             tutorial_canvas_context.strokeStyle = this.color
             tutorial_canvas_context.beginPath()
             tutorial_canvas_context.arc(this.x, this.y, this.radius, 0, (Math.PI*2), true)
-            tutorial_canvas_context.fillStyle = this.color
-            tutorial_canvas_context.fill()
+            tutorial_canvas_context.fillStyle = this.color //Can be removed for now (better keep it until the end)
+            tutorial_canvas_context.fill() //Can be removed for now (better keep it until the end)
             tutorial_canvas_context.stroke()
         }
 
@@ -136,8 +136,15 @@ window.addEventListener('DOMContentLoaded', (event) => {
     class Agent{
         constructor(grid, color){
             this.grid = grid
-            this.body = new Circle(0,0,Math.min(this.grid.width/4, this.grid.height/4), color)
+            this.body = new Circle(0,0,Math.min(this.grid.width/3, this.grid.height/3), color)
             this.location = this.grid.blocks[Math.floor(Math.random()*this.grid.blocks.length)]
+
+            do{
+                if(this.location.color == 'red'){
+                    this.location = this.grid.blocks[Math.floor(Math.random()*this.grid.blocks.length)]
+                }
+            }while (this.location.color == 'red')
+
         }
 
         draw(){
