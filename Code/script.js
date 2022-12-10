@@ -26,11 +26,9 @@ window.addEventListener('DOMContentLoaded', (event) => {
     do{
         grid_height++
     }while (tutorial_canvas.height % grid_height != 0)
-    
 
-    console.log(grid_width)
+    //console.log(grid_width)
     
-
     let moveUp = false
     let moveDown = false
     let moveLeft = false
@@ -40,12 +38,14 @@ window.addEventListener('DOMContentLoaded', (event) => {
     tutorial_canvas.style.background = "#000000"
 
     class Rectangle {
-        constructor(x, y, height, width, color){
+        constructor(x, y, height, width, color, objective){
             this.x = x
             this.y = y
             this.height = height
             this.width = width
             this.color = color
+            this.objective = objective
+            this.hit = false
             this.xmom = 0
             this.ymom = 0
         }
@@ -53,7 +53,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
         draw(){
             tutorial_canvas_context.lineWidth = 1
             tutorial_canvas_context.fillStyle = this.color
-            tutorial_canvas_context.strokeStyle = "yellow"
+            tutorial_canvas_context.strokeStyle = 'yellow'
             tutorial_canvas_context.fillRect(this.x, this.y, this.width, this.height)
             tutorial_canvas_context.strokeRect(this.x, this.y, this.width, this.height)
         }
@@ -106,17 +106,21 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     if(this.x > 0 && this.x < tutorial_canvas.width - grid_width){
                         if(this.y > 0 && this.y < tutorial_canvas.height - grid_height){
                             if(Math.random() < .91){
-                                block = new Rectangle(this.x, this.y, this.height, this.width, color)
+                                if(Math.random() < .98){
+                                    block = new Rectangle(this.x, this.y, this.height, this.width, color, false)
+                                }else{
+                                    block = new Rectangle(this.x, this.y, this.height, this.width, color, true)
+                                    console.log('blue')
+                                }  
                             }else{
-                                block = new Rectangle(this.x, this.y, this.height, this.width, 'red')
+                                block = new Rectangle(this.x, this.y, this.height, this.width, 'red', false)
                             }
                         }else{
-                            block = new Rectangle(this.x, this.y, this.height, this.width, color)
+                            block = new Rectangle(this.x, this.y, this.height, this.width, color, false)
                         }
                     }else{
-                        block = new Rectangle(this.x, this.y, this.height, this.width, color)
+                        block = new Rectangle(this.x, this.y, this.height, this.width, color, false)
                     }
-                    
 
                     this.blocks.push(block)
                     this.x+=this.width
@@ -125,7 +129,6 @@ window.addEventListener('DOMContentLoaded', (event) => {
                 this.x = 0
             }
         }
-
         draw(){
             for(let i = 0; i<this.blocks.length; i++){
                 this.blocks[i].draw()
@@ -216,6 +219,10 @@ window.addEventListener('DOMContentLoaded', (event) => {
                         if(this.body.x < this.grid.blocks[i].x+this.grid.blocks[i].width){
                             if(this.body.y < this.grid.blocks[i].y+this.grid.blocks[i].height){
                                 if(this.grid.blocks[i].color != 'red'){
+                                    if(this.grid.blocks[i].objective){
+                                        this.grid.blocks[i].hit = true
+                                        this.grid.blocks[i].objective = false
+                                    }
                                     this.location = this.grid.blocks[i]
                                 }else{
                                     moving = false
@@ -246,11 +253,65 @@ window.addEventListener('DOMContentLoaded', (event) => {
         }
     }
 
+    class Objective{
+        constructor(grid){
+            this.grid = grid
+            this.circles = new Array()
+            this.locations = new Array()
+            this.count = 0
+
+            for(let i = 0; i<this.grid.blocks.length; i++){
+                let circle
+                let location
+                
+                if(this.grid.blocks[i].objective){
+                    circle = new Circle(0,0,Math.min(this.grid.width/4, this.grid.height/4), 'blue')
+                    location = this.grid.blocks[i]
+
+                    this.circles.push(circle)
+                    this.locations.push(location)
+                } 
+            }
+        }
+        draw(){
+            for(let i = 0; i<this.circles.length; i++){
+                this.circles[i].x = this.locations[i].x + this.locations[i].width/2
+                this.circles[i].y = this.locations[i].y + this.locations[i].height/2
+                this.circles[i].draw()
+            }
+            this.collision()
+        }
+        collision(){
+            for(let i = 0; i<this.grid.blocks.length; i++){
+                for(let j = 0; j<this.circles.length; j++){
+                    if(this.circles[j].x > this.grid.blocks[i].x){
+                        if(this.circles[j].y > this.grid.blocks[i].y){
+                            if(this.circles[j].x < this.grid.blocks[i].x+this.grid.blocks[i].width){
+                                if(this.circles[j].y < this.grid.blocks[i].y+this.grid.blocks[i].height){
+                                    if(this.grid.blocks[i].objective == false){
+                                        if(this.grid.blocks[i].hit){
+                                            this.circles[j].color = 'black'
+                                            this.count++
+                                            this.grid.blocks[i].hit = false
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            console.log('Objective count - ' + this.count)
+        }
+    }
+
     let board = new Grid(grid_width,grid_height,'black')
-    let smith = new Agent(board, 'white')
+    let objective = new Objective(board)
+    let player = new Agent(board, 'white')
 
     window.setInterval(function(){
         board.draw()
-        smith.draw()
+        objective.draw()
+        player.draw()
     }, 100)
 })
