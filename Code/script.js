@@ -21,11 +21,19 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
     do{
         grid_width++
-    }while (tutorial_canvas.width % grid_width != 0)
+    }while (tutorial_canvas.width % grid_width <= 10)
 
     do{
         grid_height++
-    }while (tutorial_canvas.height % grid_height != 0)
+    }while (tutorial_canvas.height % grid_height <= 10)
+
+    if(tutorial_canvas.width % grid_width > 0){
+        tutorial_canvas.width = tutorial_canvas.width - grid_width - (tutorial_canvas.width % grid_width)
+    }
+
+    if(tutorial_canvas.height % grid_height > 0){
+        tutorial_canvas.height = tutorial_canvas.height - grid_height - (tutorial_canvas.height % grid_height)
+    }
 
     //console.log(grid_width)
     
@@ -51,11 +59,11 @@ window.addEventListener('DOMContentLoaded', (event) => {
         }
 
         draw(){
-            tutorial_canvas_context.lineWidth = 1
+            tutorial_canvas_context.lineWidth = 4
             tutorial_canvas_context.fillStyle = this.color
             tutorial_canvas_context.strokeStyle = 'yellow'
-            tutorial_canvas_context.fillRect(this.x, this.y, this.width, this.height)
-            tutorial_canvas_context.strokeRect(this.x, this.y, this.width, this.height)
+            tutorial_canvas_context.fillRect(this.x + this.width/6, this.y + this.height/6, this.width/1.5, this.height/1.5)
+            tutorial_canvas_context.strokeRect(this.x + this.width/6, this.y + this.height/6, this.width/1.5, this.height/1.5)
         }
 
         move(){
@@ -265,7 +273,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                 let location
                 
                 if(this.grid.blocks[i].objective){
-                    circle = new Circle(0,0,Math.min(this.grid.width/4, this.grid.height/4), 'blue')
+                    circle = new Circle(0,0,Math.min(this.grid.width/3.5, this.grid.height/3.5), 'blue')
                     location = this.grid.blocks[i]
 
                     this.circles.push(circle)
@@ -313,5 +321,5 @@ window.addEventListener('DOMContentLoaded', (event) => {
         board.draw()
         objective.draw()
         player.draw()
-    }, 100)
+    }, 10)
 })
