@@ -34,14 +34,14 @@ window.addEventListener('DOMContentLoaded', (event) => {
     if(tutorial_canvas.height % grid_height > 0){
         tutorial_canvas.height = tutorial_canvas.height - grid_height - (tutorial_canvas.height % grid_height)
     }
-
-    //console.log(grid_width)
     
     let moveUp = false
     let moveDown = false
     let moveLeft = false
     let moveRight = false
     let moving = false
+    let obj = 0
+    let objCount = 0
 
     tutorial_canvas.style.background = "#000000"
 
@@ -118,7 +118,8 @@ window.addEventListener('DOMContentLoaded', (event) => {
                                     block = new Rectangle(this.x, this.y, this.height, this.width, color, false)
                                 }else{
                                     block = new Rectangle(this.x, this.y, this.height, this.width, color, true)
-                                    console.log('blue')
+                                    obj++
+                                    console.log('obj')
                                 }  
                             }else{
                                 block = new Rectangle(this.x, this.y, this.height, this.width, 'red', false)
@@ -151,10 +152,10 @@ window.addEventListener('DOMContentLoaded', (event) => {
             this.location = this.grid.blocks[Math.floor(Math.random()*this.grid.blocks.length)]
 
             do{
-                if(this.location.color == 'red'){
+                if(this.location.color == 'red' || this.location.objective){
                     this.location = this.grid.blocks[Math.floor(Math.random()*this.grid.blocks.length)]
                 }
-            }while (this.location.color == 'red')
+            }while (this.location.color == 'red' || this.location.objective)
 
         }
 
@@ -266,7 +267,6 @@ window.addEventListener('DOMContentLoaded', (event) => {
             this.grid = grid
             this.circles = new Array()
             this.locations = new Array()
-            this.count = 0
 
             for(let i = 0; i<this.grid.blocks.length; i++){
                 let circle
@@ -299,7 +299,8 @@ window.addEventListener('DOMContentLoaded', (event) => {
                                     if(this.grid.blocks[i].objective == false){
                                         if(this.grid.blocks[i].hit){
                                             this.circles[j].color = 'black'
-                                            this.count++
+                                            objCount++
+                                            console.log('Objective Count')
                                             this.grid.blocks[i].hit = false
                                         }
                                     }
@@ -309,7 +310,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     }
                 }
             }
-            console.log('Objective count - ' + this.count)
+            console.log('Objective count - ' + objCount)
         }
     }
 
