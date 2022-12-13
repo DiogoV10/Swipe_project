@@ -10,29 +10,29 @@ window.addEventListener('DOMContentLoaded', (event) => {
         delete keysPressed[event.key]
     })
 
-    let tutorial_canvas = document.getElementById("tutorial")
-    let tutorial_canvas_context = tutorial_canvas.getContext('2d')
+    let canvas = document.getElementById("tutorial")
+    let canvas_context = canvas.getContext('2d')
 
-    tutorial_canvas.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
-    tutorial_canvas.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+    canvas.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
+    canvas.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
 
-    let grid_width = 50
-    let grid_height = 50
+    let grid_width = 70
+    let grid_height = 70
 
     do{
         grid_width++
-    }while (tutorial_canvas.width % grid_width <= 10)
+    }while (canvas.width % grid_width <= 10)
 
     do{
         grid_height++
-    }while (tutorial_canvas.height % grid_height <= 10)
+    }while (canvas.height % grid_height <= 10)
 
-    if(tutorial_canvas.width % grid_width > 0){
-        tutorial_canvas.width = tutorial_canvas.width - grid_width - (tutorial_canvas.width % grid_width)
+    if(canvas.width % grid_width > 0){
+        canvas.width = canvas.width - grid_width - (canvas.width % grid_width)
     }
 
-    if(tutorial_canvas.height % grid_height > 0){
-        tutorial_canvas.height = tutorial_canvas.height - grid_height - (tutorial_canvas.height % grid_height)
+    if(canvas.height % grid_height > 0){
+        canvas.height = canvas.height - grid_height - (canvas.height % grid_height)
     }
     
     let moveUp = false
@@ -43,7 +43,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
     let obj = 0
     let objCount = 0
 
-    tutorial_canvas.style.background = "#000000"
+    canvas.style.background = '#000000'
 
     class Rectangle {
         constructor(x, y, height, width, color, objective){
@@ -53,17 +53,18 @@ window.addEventListener('DOMContentLoaded', (event) => {
             this.width = width
             this.color = color
             this.objective = objective
+            this.goal = false
             this.hit = false
             this.xmom = 0
             this.ymom = 0
         }
 
         draw(){
-            tutorial_canvas_context.lineWidth = 4
-            tutorial_canvas_context.fillStyle = this.color
-            tutorial_canvas_context.strokeStyle = 'yellow'
-            tutorial_canvas_context.fillRect(this.x + this.width/6, this.y + this.height/6, this.width/1.5, this.height/1.5)
-            tutorial_canvas_context.strokeRect(this.x + this.width/6, this.y + this.height/6, this.width/1.5, this.height/1.5)
+            canvas_context.lineWidth = 2
+            canvas_context.fillStyle = this.color
+            canvas_context.strokeStyle = 'yellow'
+            canvas_context.fillRect(this.x + this.width/6, this.y + this.height/6, this.width/1.5, this.height/1.5)
+            canvas_context.strokeRect(this.x + this.width/6, this.y + this.height/6, this.width/1.5, this.height/1.5)
         }
 
         move(){
@@ -84,13 +85,13 @@ window.addEventListener('DOMContentLoaded', (event) => {
         }
 
         draw(){
-            tutorial_canvas_context.lineWidth = 4 //Change stroke width
-            tutorial_canvas_context.strokeStyle = this.color
-            tutorial_canvas_context.beginPath()
-            tutorial_canvas_context.arc(this.x, this.y, this.radius, 0, (Math.PI*2), true)
-            tutorial_canvas_context.fillStyle = this.color //Can be removed for now (better keep it until the end)
-            tutorial_canvas_context.fill() //Can be removed for now (better keep it until the end)
-            tutorial_canvas_context.stroke()
+            canvas_context.lineWidth = 2 //Change stroke width
+            canvas_context.strokeStyle = this.color
+            canvas_context.beginPath()
+            canvas_context.arc(this.x, this.y, this.radius, 0, (Math.PI*2), true)
+            canvas_context.fillStyle = this.color //Can be removed for now (better keep it until the end)
+            canvas_context.fill() //Can be removed for now (better keep it until the end)
+            canvas_context.stroke()
         }
 
         move(){
@@ -107,19 +108,19 @@ window.addEventListener('DOMContentLoaded', (event) => {
             this.y = 0
             this.blocks = []
 
-            for(let i = 0; this.y<tutorial_canvas.height; i++){
-                for(let j = 0; this.x<tutorial_canvas.width; j++){
+            for(let i = 0; this.y<canvas.height; i++){
+                for(let j = 0; this.x<canvas.width; j++){
                     let block
 
-                    if(this.x > 0 && this.x < tutorial_canvas.width - grid_width){
-                        if(this.y > 0 && this.y < tutorial_canvas.height - grid_height){
+                    if(this.x > 0 && this.x < canvas.width - grid_width){
+                        if(this.y > 0 && this.y < canvas.height - grid_height){
                             if(Math.random() < .91){
                                 if(Math.random() < .98){
                                     block = new Rectangle(this.x, this.y, this.height, this.width, color, false)
                                 }else{
                                     block = new Rectangle(this.x, this.y, this.height, this.width, color, true)
                                     obj++
-                                    console.log('obj')
+                                    console.log(obj)
                                 }  
                             }else{
                                 block = new Rectangle(this.x, this.y, this.height, this.width, 'red', false)
@@ -138,9 +139,36 @@ window.addEventListener('DOMContentLoaded', (event) => {
                 this.x = 0
             }
         }
+
         draw(){
             for(let i = 0; i<this.blocks.length; i++){
                 this.blocks[i].draw()
+            }
+            this.goal()
+        }
+
+        goal(){
+            if(objCount > 0 && objCount == 1)
+            {
+                let done = false
+                let random = 0
+
+
+                do{
+                    random = Math.floor(Math.random() * this.blocks.length)
+                    console.log(random)
+
+                    if(this.blocks[random].color == 'black')
+                    {
+                        this.blocks[random].goal = true
+                        this.blocks[random].color = 'blue'
+                        console.log('Done')
+                        done = true
+                    }
+
+                }while(done == false)   
+
+                objCount = 0
             }
         }
     }
@@ -241,19 +269,19 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     }
 
                     if(this.body.y < 0){
-                        this.location = new Rectangle(this.body.x - grid_width/2, tutorial_canvas.height - grid_height, grid_height, grid_width, 'blue')
+                        this.location = new Rectangle(this.body.x - grid_width/2, canvas.height - grid_height, grid_height, grid_width, 'blue')
                     }
     
-                    if(this.body.y > tutorial_canvas.height){
+                    if(this.body.y > canvas.height){
                         this.location = new Rectangle(this.body.x - grid_width/2, 0, grid_height, grid_width, 'blue')
                     }
                 }
 
                 if(this.body.x < 0){
-                    this.location = new Rectangle(tutorial_canvas.width - grid_width, this.body.y - grid_height/2, grid_height, grid_width, 'blue')
+                    this.location = new Rectangle(canvas.width - grid_width, this.body.y - grid_height/2, grid_height, grid_width, 'blue')
                 }
 
-                if(this.body.x > tutorial_canvas.width){
+                if(this.body.x > canvas.width){
                     this.location = new Rectangle(0, this.body.y - grid_height/2, grid_height, grid_width, 'blue')
                 }
 
@@ -298,7 +326,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                                 if(this.circles[j].y < this.grid.blocks[i].y+this.grid.blocks[i].height){
                                     if(this.grid.blocks[i].objective == false){
                                         if(this.grid.blocks[i].hit){
-                                            this.circles[j].color = 'black'
+                                            this.circles[j].color = 'transparent'
                                             objCount++
                                             console.log('Objective Count')
                                             this.grid.blocks[i].hit = false
