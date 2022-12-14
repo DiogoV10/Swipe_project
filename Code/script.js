@@ -180,10 +180,10 @@ window.addEventListener('DOMContentLoaded', (event) => {
             this.location = this.grid.blocks[Math.floor(Math.random()*this.grid.blocks.length)]
 
             do{
-                if(this.location.color == 'red' || this.location.objective){
+                if(this.location.color != 'black' || this.location.objective){
                     this.location = this.grid.blocks[Math.floor(Math.random()*this.grid.blocks.length)]
                 }
-            }while (this.location.color == 'red' || this.location.objective)
+            }while (this.location.color != 'black' || this.location.objective)
 
         }
 
@@ -255,7 +255,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     if(this.body.y > this.grid.blocks[i].y){
                         if(this.body.x < this.grid.blocks[i].x+this.grid.blocks[i].width){
                             if(this.body.y < this.grid.blocks[i].y+this.grid.blocks[i].height){
-                                if(this.grid.blocks[i].color != 'red'){
+                                if(this.grid.blocks[i].color == 'black'){
                                     if(this.grid.blocks[i].objective){
                                         this.grid.blocks[i].hit = true
                                         this.grid.blocks[i].objective = false
