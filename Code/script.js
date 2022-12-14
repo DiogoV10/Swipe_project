@@ -23,11 +23,17 @@ window.addEventListener('DOMContentLoaded', (event) => {
                 delete keysPressed[event.key]
             })
 
-            let canvas = document.getElementById("tutorial")
+            let menu = document.getElementById('menu')
+
+            menu.height = 50
+
+            let canvas = document.getElementById('canvas')
             let canvas_context = canvas.getContext('2d')
 
             canvas.width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
             canvas.height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
+
+            canvas.height = canvas.height - menu.height
 
             let grid_width = 70
             let grid_height = 70
