@@ -3,7 +3,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
     var url = "http://colormind.io/api/";
     var data = {
         model : "default",
-        input : ["N","N","N","N","N"]
+        input : ["N", "N", [255, 45, 0], "N", "N"]
     }
 
     var http = new XMLHttpRequest();
@@ -11,7 +11,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
     http.onreadystatechange = function() {
         if(http.readyState == 4 && http.status == 200) {
             var palette = JSON.parse(http.responseText).result;
-            
+            console.log(palette)
             
             let keysPressed = {}
 
@@ -22,6 +22,58 @@ window.addEventListener('DOMContentLoaded', (event) => {
             document.addEventListener('keyup', (event) =>{
                 delete keysPressed[event.key]
             })
+
+            var fileText
+
+            const file = './levels.txt'
+
+            function readFile(file){
+                var rawFile = new XMLHttpRequest();
+                rawFile.open("GET", file, false);
+                rawFile.onreadystatechange = function ()
+                {
+                    if(rawFile.readyState === 4)
+                    {
+                        if(rawFile.status === 200 || rawFile.status == 0)
+                        {
+                            fileText = rawFile.responseText;
+                            alert(fileText);
+
+                           
+                        }
+                    }
+                }
+                rawFile.send(null);
+            }
+
+            readFile(file)
+
+            let levels = []
+            let levelNumber = 1
+            let hasLevelChanged = false
+
+            function changeLevel(levelNumber){
+                levels.length = 0
+
+                let myArray = fileText.split("{")
+                let text = myArray[levelNumber]
+                let myArray2 = text.split("}")
+                let text2 = myArray2[0]
+                let myArray3 = text2.split("\r\n")
+
+                for(let i = 1; i <= 10; i++){
+
+                    let text3 = myArray3[i]
+                    let myArray4 = text3.split(";")
+
+                    for(let j = 0; j < 10; j++){
+                        levels.push(myArray4[j])
+                    }
+                }
+            }
+
+            changeLevel(levelNumber)
+            console.log(levels)
 
             windowWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
             windowHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
@@ -49,6 +101,10 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     canvasNM.style.display = 'none'
                     canvasIM.style.display = 'block'
                     menuN.style.display = 'none'
+                    levelNumber = levelNumber + 1
+                    changeLevel(levelNumber)
+                    hasLevelChanged = true
+ 
                 }else{
                     mode.textContent = 'Normal Mode'
                     nMode = true
@@ -86,7 +142,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     canvasIM.height = canvasIM.height - grid_height - (canvasIM.height % grid_height)
                 }
     
-                menu.height = (windowHeight - canvasIM.height)/2 - 10
+                menu.height = (windowHeight - canvasIM.height)/2 - 20
                 
                 menu.style.height = menu.height + 'px'
     
@@ -445,13 +501,13 @@ window.addEventListener('DOMContentLoaded', (event) => {
                         this.hit = false
                         this.xmom = 0
                         this.ymom = 0
-                        this.shadowColor = 'none'
-                        this.shadowBlur = 0
+                        this.shadowColor = 'none' //Para remover
+                        this.shadowBlur = 0 //Para remover
                     }
     
                     draw(){
-                        canvasNM_context.shadowColor = this.shadowColor
-                        canvasNM_context.shadowBlur = this.shadowBlur
+                        canvasNM_context.shadowColor = this.shadowColor //Para remover
+                        canvasNM_context.shadowBlur = this.shadowBlur //Para remover
                         canvasNM_context.lineWidth = 2
                         canvasNM_context.fillStyle = this.color
                         canvasNM_context.strokeStyle = 'grey'
@@ -498,42 +554,59 @@ window.addEventListener('DOMContentLoaded', (event) => {
                         this.height = height
                         this.x = 0
                         this.y = 0
+                        this.color = color
                         this.blocks = []
+                        this.grid = 0
     
                         for(let i = 0; this.y<canvasNM.height; i++){
                             for(let j = 0; this.x<canvasNM.width; j++){
                                 let block
-    
-                                if(this.x > 0 && this.x < canvasNM.width - grid_width){
-                                    if(this.y > 0 && this.y < canvasNM.height - grid_height){
-                                        if(Math.random() < .91){
-                                            if(Math.random() < .98){
-                                                block = new Rectangle(this.x, this.y, this.height, this.width, color, false)
-                                            }else{
-                                                block = new Rectangle(this.x, this.y, this.height, this.width, color, true)
-                                                obj++
-                                            }  
-                                        }else{
-                                            block = new Rectangle(this.x, this.y, this.height, this.width, getRandomColor(palette), false)
-                                            block.shadowBlur = 1
-                                            block.shadowColor = 'white'
-                                        }
-                                    }else{
-                                        block = new Rectangle(this.x, this.y, this.height, this.width, color, false)
-                                    }
+
+                                if(levels[this.grid] == '1'){
+                                    block = new Rectangle(this.x, this.y, this.height, this.width, getRandomColor(palette), false)
+                                    block.shadowBlur = 1
+                                    block.shadowColor = 'white'
+                                }else if(levels[this.grid] == '2'){
+                                    block = new Rectangle(this.x, this.y, this.height, this.width, color, true)
+                                    obj++
                                 }else{
                                     block = new Rectangle(this.x, this.y, this.height, this.width, color, false)
                                 }
     
                                 this.blocks.push(block)
                                 this.x+=this.width
+                                this.grid = this.grid + 1
                             }
                             this.y+=this.height
                             this.x = 0
                         }
                     }
+                    level(){
+                        if(hasLevelChanged){
+                            obj = 0
+
+                            for(let i = 0; i<levels.length; i++){
+  
+                                if(levels[i] == '1'){
+                                    this.blocks[i].color = getRandomColor(palette)
+                                    this.blocks[i].objective = false
+                                    this.blocks[i].shadowBlur = 1 //Para remover
+                                    this.blocks[i].shadowColor = 'white' //Para remover
+                                }else if(levels[i] == '2'){
+                                    this.blocks[i].color = this.color
+                                    this.blocks[i].objective = true
+                                    obj++
+                                }else{
+                                    this.blocks[i].color = this.color
+                                    this.blocks[i].objective = false
+                                }
+                            }                           
+                        }
+                        
+                    }
     
                     draw(){
+                        this.level()
                         for(let i = 0; i<this.blocks.length; i++){
                             this.blocks[i].draw()
                         }
@@ -544,19 +617,15 @@ window.addEventListener('DOMContentLoaded', (event) => {
                         if(objCount > 0 && objCount == obj)
                         {
                             let done = false
-                            let random = 0
-    
     
                             do{
-                                random = Math.floor(Math.random() * this.blocks.length)
-    
-                                if(this.blocks[random].color == 'black')
-                                {
-                                    this.blocks[random].goal = true
-                                    this.blocks[random].color = 'blue'
-                                    done = true
+                                for(let i=0; i<levels.length; i++){
+                                    if(levels[i] == 4){
+                                        this.blocks[i].goal = true
+                                        this.blocks[i].color = 'blue'
+                                        done = true
+                                    }
                                 }
-    
                             }while(done == false)   
     
                             objCount = 0
@@ -570,15 +639,26 @@ window.addEventListener('DOMContentLoaded', (event) => {
                         this.body = new Circle(0,0,Math.min(this.grid.width/3, this.grid.height/3), color)
                         this.location = this.grid.blocks[Math.floor(Math.random()*this.grid.blocks.length)]
     
-                        do{
-                            if(this.location.color != 'black' || this.location.objective){
-                                this.location = this.grid.blocks[Math.floor(Math.random()*this.grid.blocks.length)]
+                        for(let i=0; i<levels.length; i++){
+                            if(levels[i] == 3){
+                                this.location = this.grid.blocks[i]
                             }
-                        }while (this.location.color != 'black' || this.location.objective)
+                        }
     
+                    }
+                    level(){
+                        if(hasLevelChanged){
+                            for(let i=0; i<levels.length; i++){
+                                if(levels[i] == 3){
+                                    this.location = this.grid.blocks[i]
+                                }
+                            }
+                        }
+                        hasLevelChanged = false
                     }
     
                     draw(){
+                        this.level()
                         this.body.x = this.location.x + this.location.width/2
                         this.body.y = this.location.y + this.location.height/2
                         this.body.draw()
@@ -691,16 +771,27 @@ window.addEventListener('DOMContentLoaded', (event) => {
                             let circle
                             let location
                             
+                            circle = new Circle(0,0,Math.min(this.grid.width/3.5, this.grid.height/3.5), 'transparent')
+                            location = this.grid.blocks[i]
+
                             if(this.grid.blocks[i].objective){
-                                circle = new Circle(0,0,Math.min(this.grid.width/3.5, this.grid.height/3.5), 'blue')
-                                location = this.grid.blocks[i]
-    
-                                this.circles.push(circle)
-                                this.locations.push(location)
+                                circle.color = 'blue'
                             } 
+                            this.circles.push(circle)
+                            this.locations.push(location)
+                        }
+                    }
+                    level(){
+                        for(let i = 0; i<this.grid.blocks.length; i++){
+                            if(this.grid.blocks[i].objective){
+                                this.circles[i].color = 'blue'
+                            }else{
+                                this.circles[i].color = 'transparent'
+                            }
                         }
                     }
                     draw(){
+                        this.level()
                         for(let i = 0; i<this.circles.length; i++){
                             this.circles[i].x = this.locations[i].x + this.locations[i].width/2
                             this.circles[i].y = this.locations[i].y + this.locations[i].height/2
@@ -746,16 +837,13 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
             infiniteMode()
             normalMode()
+
         }
     }
 
     function getRandomColor(p){
         var randomNumber=Math.floor(Math.random()*5)
-        return "#"+rgbToHex(p[randomNumber][0],p[randomNumber][1],p[randomNumber][2])
-    }
-
-    function rgbToHex(r, g, b) {
-        return(r.toString(16) + g.toString(16) + b.toString(16));
+        return `rgb(${p[randomNumber][0]},${p[randomNumber][1]},${p[randomNumber][2]})`
     }
 
     http.open("POST", url, true);
