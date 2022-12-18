@@ -402,7 +402,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
     
                                 for(let i = 0; i<this.blocks.length; i++){
                                     if(this.blocks[i].goal == true){
-                                        this.blocks[i].color = 'black'
+                                        this.blocks[i].color = 'transparent'
                                         this.blocks[i].goal = false
                                     }
                                     this.blocks[i].objective = this.initialObjective[i]
@@ -416,7 +416,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
     
                                 for(let i = 0; i<this.blocks.length; i++){
                                     if(this.blocks[i].goal == true){
-                                        this.blocks[i].color = 'black'
+                                        this.blocks[i].color = 'transparent'
                                         this.blocks[i].goal = false
                                     }
                                     this.blocks[i].objective = this.initialObjective[i]
@@ -500,7 +500,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                                 do{
                                     random = Math.floor(Math.random() * this.blocks.length)
         
-                                    if(this.blocks[random].color == 'black')
+                                    if(this.blocks[random].color == 'transparent')
                                     {
                                         this.blocks[random].goal = true
                                         this.blocks[random].color = 'blue'
@@ -521,10 +521,10 @@ window.addEventListener('DOMContentLoaded', (event) => {
                             this.location = this.grid.blocks[Math.floor(Math.random()*this.grid.blocks.length)]
         
                             do{
-                                if(this.location.color != 'black' || this.location.objective){
+                                if(this.location.color != 'transparent' || this.location.objective){
                                     this.location = this.grid.blocks[Math.floor(Math.random()*this.grid.blocks.length)]
                                 }
-                            }while (this.location.color != 'black' || this.location.objective)
+                            }while (this.location.color != 'transparent' || this.location.objective)
                             
                             this.initialLocation = this.location
                         }
@@ -543,10 +543,10 @@ window.addEventListener('DOMContentLoaded', (event) => {
                                 this.location = this.grid.blocks[Math.floor(Math.random()*this.grid.blocks.length)]
     
                                 do{
-                                    if(this.location.color != 'black' || this.location.objective){
+                                    if(this.location.color != 'transparent' || this.location.objective){
                                         this.location = this.grid.blocks[Math.floor(Math.random()*this.grid.blocks.length)]
                                     }
-                                }while (this.location.color != 'black' || this.location.objective)
+                                }while (this.location.color != 'transparent' || this.location.objective)
                                 
                                 this.initialLocation = this.location
     
@@ -643,7 +643,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                                     if(this.body.y > this.grid.blocks[i].y){
                                         if(this.body.x < this.grid.blocks[i].x+this.grid.blocks[i].width){
                                             if(this.body.y < this.grid.blocks[i].y+this.grid.blocks[i].height){
-                                                if(this.grid.blocks[i].color == 'black'){
+                                                if(this.grid.blocks[i].color == 'transparent'){
                                                     if(this.grid.blocks[i].objective){
                                                         this.grid.blocks[i].hit = true
                                                         this.grid.blocks[i].objective = false
@@ -741,7 +741,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                         }
                     }
         
-                    let board = new Grid(grid_width,grid_height,'black')
+                    let board = new Grid(grid_width,grid_height,'transparent')
                     let objective = new Objective(board)
                     let player = new Agent(board, 'white')
                     
@@ -1094,7 +1094,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                                     if(this.body.y > this.grid.blocks[i].y){
                                         if(this.body.x < this.grid.blocks[i].x+this.grid.blocks[i].width){
                                             if(this.body.y < this.grid.blocks[i].y+this.grid.blocks[i].height){
-                                                if(this.grid.blocks[i].color == 'black'){
+                                                if(this.grid.blocks[i].color == 'transparent'){
                                                     if(this.grid.blocks[i].objective){
                                                         this.grid.blocks[i].hit = true
                                                         this.grid.blocks[i].objective = false
@@ -1195,7 +1195,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                         }
                     }
         
-                    let board = new Grid(grid_width,grid_height,'black')
+                    let board = new Grid(grid_width,grid_height,'transparent')
                     let objective = new Objective(board)
                     let player = new Agent(board, 'white')
         
