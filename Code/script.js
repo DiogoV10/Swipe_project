@@ -51,6 +51,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             let levels = []
             let levelNumber = 1
             let hasLevelChanged = false
+            let hasLvLStateChanged = false
 
             function changeLevel(levelNumber){
                 levels.length = 0
@@ -104,6 +105,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     levelNumber = levelNumber + 1
                     changeLevel(levelNumber)
                     hasLevelChanged = true
+                    hasLvLStateChanged = true
  
                 }else{
                     mode.textContent = 'Normal Mode'
@@ -142,8 +144,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     canvasIM.height = canvasIM.height - grid_height - (canvasIM.height % grid_height)
                 }
     
-                menu.height = (windowHeight - canvasIM.height)/2 - 20
-                
+                menu.height = (windowHeight - canvasIM.height)/3
                 menu.style.height = menu.height + 'px'
     
                 let moveUp = false
@@ -461,6 +462,9 @@ window.addEventListener('DOMContentLoaded', (event) => {
                 
                 window.setInterval(function(){
                     if(nMode == false){
+                        menu.height = (windowHeight - canvasIM.height)/3
+                        menu.style.height = menu.height + 'px'
+
                         board.draw()
                         objective.draw()
                         player.draw()
@@ -469,10 +473,6 @@ window.addEventListener('DOMContentLoaded', (event) => {
             }
             
             function normalMode () {
-
-                menuN.height = (windowHeight - (menu.height+19))
-                
-                menuN.style.height = menuN.height + 'px'
 
                 let canvasNM_context = canvasNM.getContext('2d')
     
@@ -509,8 +509,8 @@ window.addEventListener('DOMContentLoaded', (event) => {
                         canvasNM_context.shadowColor = this.shadowColor //Para remover
                         canvasNM_context.shadowBlur = this.shadowBlur //Para remover
                         canvasNM_context.lineWidth = 2
-                        canvasNM_context.fillStyle = this.color
-                        canvasNM_context.strokeStyle = 'grey'
+                        canvasNM_context.fillStyle = 'transparent'
+                        canvasNM_context.strokeStyle = this.color
                         canvasNM_context.fillRect(this.x + this.width/6, this.y + this.height/6, this.width/1.5, this.height/1.5)
                         canvasNM_context.strokeRect(this.x + this.width/6, this.y + this.height/6, this.width/1.5, this.height/1.5)
                     }
@@ -533,13 +533,16 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     }
     
                     draw(){
-                        canvasNM_context.lineWidth = 2 //Change stroke width
+                        canvasNM_context.shadowBlur = 1
+                        canvasNM_context.shadowColor = 'black'
+                        canvasNM_context.lineWidth = 1 //Change stroke width
                         canvasNM_context.strokeStyle = this.color
                         canvasNM_context.beginPath()
                         canvasNM_context.arc(this.x, this.y, this.radius, 0, (Math.PI*2), true)
-                        canvasNM_context.fillStyle = this.color //Can be removed for now (better keep it until the end)
+                        //canvasNM_context.fillStyle = this.color //Can be removed for now (better keep it until the end)
                         canvasNM_context.fill() //Can be removed for now (better keep it until the end)
                         canvasNM_context.stroke()
+                        canvasNM_context.closePath()
                     }
     
                     move(){
@@ -581,6 +584,20 @@ window.addEventListener('DOMContentLoaded', (event) => {
                             this.x = 0
                         }
                     }
+                    saveLevelState(){
+                        if(hasLvLStateChanged){
+                            let canvas
+
+                            canvas = this.blocks
+
+                            canvasNM_context.clearRect(0, 0, canvasNM.width, canvasNM.height);
+
+                            this.blocks = canvas
+
+                            hasLvLStateChanged = false
+                        }                  
+                    }
+
                     level(){
                         if(hasLevelChanged){
                             obj = 0
@@ -595,10 +612,12 @@ window.addEventListener('DOMContentLoaded', (event) => {
                                 }else if(levels[i] == '2'){
                                     this.blocks[i].color = this.color
                                     this.blocks[i].objective = true
+                                    this.blocks[i].shadowBlur = 0
                                     obj++
                                 }else{
                                     this.blocks[i].color = this.color
                                     this.blocks[i].objective = false
+                                    this.blocks[i].shadowBlur = 0
                                 }
                             }                           
                         }
@@ -606,6 +625,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     }
     
                     draw(){
+                        this.saveLevelState()
                         this.level()
                         for(let i = 0; i<this.blocks.length; i++){
                             this.blocks[i].draw()
@@ -658,21 +678,28 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     }
     
                     draw(){
+                        this.control()
                         this.level()
                         this.body.x = this.location.x + this.location.width/2
                         this.body.y = this.location.y + this.location.height/2
                         this.body.draw()
-                        this.control()
                     }
     
                     control(){
+                        if(moving == false){
+                            moveDown = false
+                            moveLeft = false
+                            moveRight = false
+                            moveUp = false
+                        }
+                        
                         if(keysPressed['w']){
                             if(moving == false){
                                 moveDown = false
                                 moveLeft = false
                                 moveRight = false
                                 moveUp = true
-    
+                                
                                 moving = true
                             }
                         }
@@ -682,7 +709,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                                 moveRight = false
                                 moveUp = false
                                 moveLeft = true
-    
+                                
                                 moving = true
                             }
                         }
@@ -706,17 +733,29 @@ window.addEventListener('DOMContentLoaded', (event) => {
                                 moving = true
                             }  
                         }
+
+                        if(hasLevelChanged){
+                            moveUp = false
+                            moveLeft = false
+                            moveDown = false
+                            moveRight = false
+                            moving = false
+                        }
     
                         if(moveUp){
+                            hasLvLStateChanged = true
                             this.body.y -= this.grid.height
                         }
                         if(moveLeft){
+                            hasLvLStateChanged = true
                             this.body.x -= this.grid.width
                         }
                         if(moveDown){
+                            hasLvLStateChanged = true
                             this.body.y += this.grid.height
                         }
                         if(moveRight){
+                            hasLvLStateChanged = true
                             this.body.x += this.grid.width
                         }
                         
@@ -733,7 +772,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                                                 }
                                                 this.location = this.grid.blocks[i]
                                             }else{
-                                                moving = false
+                                                moving = false       
                                             }
                                         }
                                     }
@@ -828,6 +867,9 @@ window.addEventListener('DOMContentLoaded', (event) => {
     
                 window.setInterval(function(){
                     if(nMode){
+                        menuN.height = canvasIM.height + menu.height + 10
+                        menuN.style.height = menuN.height + 'px'
+
                         board.draw()
                         objective.draw()
                         player.draw()
