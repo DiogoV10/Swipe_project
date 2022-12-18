@@ -11,7 +11,6 @@ window.addEventListener('DOMContentLoaded', (event) => {
     http.onreadystatechange = function() {
         if(http.readyState == 4 && http.status == 200) {
             var palette = JSON.parse(http.responseText).result;
-            console.log(palette)
             
             let keysPressed = {}
 
@@ -50,9 +49,15 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
             let levels = []
             let levelNumber = 1
-            let hasLevelChanged = false
+            let maxLevel = 0
+            let levelDone = false
+            let hasLevelChangedNM = false
+            let hasLevelChangedIM = false
             let hasLvLStateChangedNM = false
             let hasLvLStateChangedIM = false
+            let hasLvLRestartNM = false
+            let hasLvLRestartIM = false
+            let restartIM = false
 
             function changeLevel(levelNumber){
                 levels.length = 0
@@ -75,7 +80,6 @@ window.addEventListener('DOMContentLoaded', (event) => {
             }
 
             changeLevel(levelNumber)
-            console.log(levels)
 
             windowWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
             windowHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
@@ -93,6 +97,9 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
 
             let mode = document.querySelector('.mode')
+            let restart = document.querySelector('.restart')
+            let nextLvL = document.querySelector('.next')
+            let previousLvL = document.querySelector('.previous')
 
             let nMode = true
 
@@ -103,19 +110,46 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     canvasNM.style.display = 'none'
                     canvasIM.style.display = 'block'
                     menuN.style.display = 'none'
-                    levelNumber = levelNumber + 1
-                    changeLevel(levelNumber)
-                    hasLevelChanged = true
-                    hasLvLStateChangedNM = true
-                    hasLvLStateChangedIM = true
- 
+                    nextLvL.textContent = 'New Level'
+                    previousLvL.style.display = 'none'
                 }else{
                     mode.textContent = 'Normal Mode'
                     nMode = true
                     canvasNM.style.display = 'block'
                     canvasIM.style.display = 'none'
                     menuN.style.display = 'block'
+                    nextLvL.textContent = 'Next Level'
                 }
+            })
+
+            restart.addEventListener('click', function changeMode() {
+                if(nMode == true){
+                    //hasLvLRestartNM = true
+                    hasLevelChangedNM = true
+                    hasLvLStateChangedNM = true
+                }else{
+                    hasLvLRestartIM = true
+                    hasLvLStateChangedIM = true
+                }
+            })
+
+            nextLvL.addEventListener('click', function changeMode() {
+                if(nMode == true){
+                    levelNumber = levelNumber + 1
+                    changeLevel(levelNumber)
+                    hasLevelChangedNM = true
+                    hasLvLStateChangedNM = true
+                }else{
+                    hasLevelChangedIM = true
+                    hasLvLStateChangedIM = true
+                }
+            })
+
+            previousLvL.addEventListener('click', function changeMode() {
+                levelNumber = levelNumber - 1
+                changeLevel(levelNumber)
+                hasLevelChangedNM = true
+                hasLvLStateChangedNM = true
             })
             
             function infiniteMode () {
@@ -205,7 +239,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     draw(){
                         canvasIM_context.shadowBlur = 1
                         canvasIM_context.shadowColor = 'black'
-                        canvasIM_context.lineWidth = 1 //Change stroke width
+                        canvasIM_context.lineWidth = 1
                         canvasIM_context.strokeStyle = this.color
                         canvasIM_context.beginPath()
                         canvasIM_context.arc(this.x, this.y, this.radius, 0, (Math.PI*2), true)
@@ -227,7 +261,9 @@ window.addEventListener('DOMContentLoaded', (event) => {
                         this.height = height
                         this.x = 0
                         this.y = 0
+                        this.color = color
                         this.blocks = []
+                        this.initialObjective = []
     
                         for(let i = 0; this.y<canvasIM.height; i++){
                             for(let j = 0; this.x<canvasIM.width; j++){
@@ -260,7 +296,48 @@ window.addEventListener('DOMContentLoaded', (event) => {
                             this.y+=this.height
                             this.x = 0
                         }
+
+                        for(let i = 0; i<this.blocks.length; i++){
+                            this.initialObjective[i] = this.blocks[i].objective
+                        }
                     }
+
+                    restart(){
+                        if(hasLvLRestartIM){
+                            obj = 0
+                            objCount = 0
+
+                            for(let i = 0; i<this.blocks.length; i++){
+                                if(this.blocks[i].goal == true){
+                                    this.blocks[i].color = 'black'
+                                    this.blocks[i].goal = false
+                                }
+                                this.blocks[i].objective = this.initialObjective[i]
+                                this.blocks[i].hit = false
+                            }
+                        }
+
+                        if(restartIM){
+                            obj = 0
+                            objCount = 0
+
+                            for(let i = 0; i<this.blocks.length; i++){
+                                if(this.blocks[i].goal == true){
+                                    this.blocks[i].color = 'black'
+                                    this.blocks[i].goal = false
+                                }
+                                this.blocks[i].objective = this.initialObjective[i]
+                                this.blocks[i].hit = false
+
+                                if(this.blocks[i].objective){
+                                    obj++
+                                }
+                            }
+
+                            restartIM = false
+                        }
+                    }
+
                     saveLevelState(){
                         if(hasLvLStateChangedIM){
                             let canvas
@@ -274,13 +351,50 @@ window.addEventListener('DOMContentLoaded', (event) => {
                             hasLvLStateChangedIM = false
                         }                  
                     }
+
+                    newLevel(){
+                        if(hasLevelChangedIM){
+                            let block
+
+                            obj=0
+                            objCount = 0
+
+                            for(let i = 0; i<this.blocks.length; i++){
+                                if(this.blocks[i].x > 0 && this.blocks[i].x < canvasIM.width - grid_width){
+                                    if(this.blocks[i].y > 0 && this.blocks[i].y < canvasIM.height - grid_height){
+                                        if(Math.random() < .91){
+                                            if(Math.random() < .98){
+                                                block = new Rectangle(this.blocks[i].x, this.blocks[i].y, this.blocks[i].height, this.blocks[i].width, this.color, false)
+                                            }else{
+                                                block = new Rectangle(this.blocks[i].x, this.blocks[i].y, this.blocks[i].height, this.blocks[i].width, this.color, true)
+                                                obj++
+                                            }  
+                                        }else{
+                                            block = new Rectangle(this.blocks[i].x, this.blocks[i].y, this.blocks[i].height, this.blocks[i].width, getRandomColor(palette), false)
+                                            block.shadowBlur = 1
+                                            block.shadowColor = 'white'
+                                        }
+                                    }else{
+                                        block = new Rectangle(this.blocks[i].x, this.blocks[i].y, this.blocks[i].height, this.blocks[i].width, this.color, false)
+                                    }
+                                }else{
+                                    block = new Rectangle(this.blocks[i].x, this.blocks[i].y, this.blocks[i].height, this.blocks[i].width, this.color, false)
+                                }
+
+                                this.blocks[i] = block
+                                this.initialObjective[i] = this.blocks[i].objective
+                            }
+                        }
+                    }
     
                     draw(){
+                        this.goal()
+                        this.restart()
                         this.saveLevelState()
+                        this.newLevel()
                         for(let i = 0; i<this.blocks.length; i++){
                             this.blocks[i].draw()
                         }
-                        this.goal()
                     }
     
                     goal(){
@@ -318,11 +432,39 @@ window.addEventListener('DOMContentLoaded', (event) => {
                                 this.location = this.grid.blocks[Math.floor(Math.random()*this.grid.blocks.length)]
                             }
                         }while (this.location.color != 'black' || this.location.objective)
-    
+                        
+                        this.initialLocation = this.location
+                    }
+
+                    restart(){
+                        if(hasLvLRestartIM){
+                            this.location = this.initialLocation
+
+                            restartIM = true
+                            hasLvLRestartIM = false
+                        }
+                    }
+
+                    newLevel(){
+                        if(hasLevelChangedIM){
+                            this.location = this.grid.blocks[Math.floor(Math.random()*this.grid.blocks.length)]
+
+                            do{
+                                if(this.location.color != 'black' || this.location.objective){
+                                    this.location = this.grid.blocks[Math.floor(Math.random()*this.grid.blocks.length)]
+                                }
+                            }while (this.location.color != 'black' || this.location.objective)
+                            
+                            this.initialLocation = this.location
+
+                            hasLevelChangedIM = false
+                        }
                     }
     
                     draw(){
                         this.control()
+                        this.restart()
+                        this.newLevel()
                         this.body.x = this.location.x + this.location.width/2
                         this.body.y = this.location.y + this.location.height/2
                         this.body.draw()
@@ -375,6 +517,14 @@ window.addEventListener('DOMContentLoaded', (event) => {
     
                                 moving = true
                             }  
+                        }
+
+                        if(hasLevelChangedIM || hasLvLRestartIM){
+                            moveUp = false
+                            moveLeft = false
+                            moveDown = false
+                            moveRight = false
+                            moving = false
                         }
     
                         if(moveUp){
@@ -542,13 +692,13 @@ window.addEventListener('DOMContentLoaded', (event) => {
                         this.hit = false
                         this.xmom = 0
                         this.ymom = 0
-                        this.shadowColor = 'none' //Para remover
-                        this.shadowBlur = 0 //Para remover
+                        this.shadowColor = 'none'
+                        this.shadowBlur = 0
                     }
     
                     draw(){
-                        canvasNM_context.shadowColor = this.shadowColor //Para remover
-                        canvasNM_context.shadowBlur = this.shadowBlur //Para remover
+                        canvasNM_context.shadowColor = this.shadowColor
+                        canvasNM_context.shadowBlur = this.shadowBlur
                         canvasNM_context.lineWidth = 2
                         canvasNM_context.fillStyle = 'transparent'
                         canvasNM_context.strokeStyle = this.color
@@ -576,12 +726,12 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     draw(){
                         canvasNM_context.shadowBlur = 1
                         canvasNM_context.shadowColor = 'black'
-                        canvasNM_context.lineWidth = 1 //Change stroke width
+                        canvasNM_context.lineWidth = 1
                         canvasNM_context.strokeStyle = this.color
                         canvasNM_context.beginPath()
                         canvasNM_context.arc(this.x, this.y, this.radius, 0, (Math.PI*2), true)
                         //canvasNM_context.fillStyle = this.color //Can be removed for now (better keep it until the end)
-                        canvasNM_context.fill() //Can be removed for now (better keep it until the end)
+                        //canvasNM_context.fill() //Can be removed for now (better keep it until the end)
                         canvasNM_context.stroke()
                         canvasNM_context.closePath()
                     }
@@ -625,6 +775,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                             this.x = 0
                         }
                     }
+
                     saveLevelState(){
                         if(hasLvLStateChangedNM){
                             let canvas
@@ -640,7 +791,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     }
 
                     level(){
-                        if(hasLevelChanged){
+                        if(hasLevelChangedNM){
                             obj = 0
 
                             for(let i = 0; i<levels.length; i++){
@@ -648,19 +799,54 @@ window.addEventListener('DOMContentLoaded', (event) => {
                                 if(levels[i] == '1'){
                                     this.blocks[i].color = getRandomColor(palette)
                                     this.blocks[i].objective = false
-                                    this.blocks[i].shadowBlur = 1 //Para remover
-                                    this.blocks[i].shadowColor = 'white' //Para remover
+                                    this.blocks[i].hit = false
+                                    this.blocks[i].shadowBlur = 1
+                                    this.blocks[i].shadowColor = 'white'
                                 }else if(levels[i] == '2'){
                                     this.blocks[i].color = this.color
                                     this.blocks[i].objective = true
+                                    this.blocks[i].hit = false
                                     this.blocks[i].shadowBlur = 0
                                     obj++
                                 }else{
                                     this.blocks[i].color = this.color
                                     this.blocks[i].objective = false
+                                    this.blocks[i].hit = false
                                     this.blocks[i].shadowBlur = 0
                                 }
-                            }                           
+                            }  
+                            
+                        }
+
+                        if(hasLvLRestartNM){
+                            obj = 0
+
+                            for(let i = 0; i<levels.length; i++){
+  
+                                if(levels[i] == '1'){
+                                    this.blocks[i].color = getRandomColor(palette)
+                                    this.blocks[i].objective = false
+                                    this.blocks[i].hit = false
+                                    this.blocks[i].goal = false
+                                    this.blocks[i].shadowBlur = 1
+                                    this.blocks[i].shadowColor = 'white'
+                                }else if(levels[i] == '2'){
+                                    this.blocks[i].color = this.color
+                                    this.blocks[i].objective = true
+                                    this.blocks[i].hit = false
+                                    this.blocks[i].goal = false
+                                    this.blocks[i].shadowBlur = 0
+                                    obj++
+                                }else{
+                                    this.blocks[i].color = this.color
+                                    this.blocks[i].objective = false
+                                    this.blocks[i].hit = false
+                                    this.blocks[i].goal = false
+                                    this.blocks[i].shadowBlur = 0
+                                }
+                            }  
+
+                            hasLvLRestartNM = false
                         }
                         
                     }
@@ -707,15 +893,17 @@ window.addEventListener('DOMContentLoaded', (event) => {
                         }
     
                     }
+
                     level(){
-                        if(hasLevelChanged){
+                        if(hasLevelChangedNM){
                             for(let i=0; i<levels.length; i++){
                                 if(levels[i] == 3){
                                     this.location = this.grid.blocks[i]
                                 }
                             }
+                            hasLvLRestartNM = true
                         }
-                        hasLevelChanged = false
+                        hasLevelChangedNM = false
                     }
     
                     draw(){
@@ -775,7 +963,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                             }  
                         }
 
-                        if(hasLevelChanged){
+                        if(hasLevelChangedNM){
                             moveUp = false
                             moveLeft = false
                             moveDown = false
@@ -813,6 +1001,9 @@ window.addEventListener('DOMContentLoaded', (event) => {
                                                 }
                                                 this.location = this.grid.blocks[i]
                                             }else{
+                                                if(this.grid.blocks[i].goal == true){
+                                                    levelDone = true
+                                                }
                                                 moving = false       
                                             }
                                         }
@@ -910,6 +1101,36 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     if(nMode){
                         menuN.height = canvasIM.height + menu.height + 10
                         menuN.style.height = menuN.height + 'px'
+                        
+                        if(levelNumber > levels.length + 1){
+                            levelNumber = levelNumber - 1
+                            changeLevel(levelNumber)
+                            hasLevelChangedNM = true
+                            hasLvLStateChangedNM = true
+                            maxLevel = levelNumber
+                        }
+
+                        if(levelNumber>1){
+                            previousLvL.style.display = 'block'
+                        }else{
+                            previousLvL.style.display = 'none'
+                        }
+
+                        if(levelDone){
+                            if(levelNumber > maxLevel){
+                                nextLvL.style.display = 'block'
+                                maxLevel = maxLevel + 1
+                            }
+                            levelDone = false
+                        }
+
+                        if(levelNumber <= maxLevel){
+                            nextLvL.style.display = 'block'
+                        }else{
+                            nextLvL.style.display = 'none'
+                        }
+
+                        
 
                         board.draw()
                         objective.draw()
