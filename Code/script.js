@@ -47,6 +47,12 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
             readFile(file)
 
+            let buttonClickSound = new sound("buttonClick.wav")
+            buttonClickSound.volume(0.3)
+            let bgMusic = new sound("bgMusic.wav")
+            bgMusic.volume(0.3)
+            bgMusic.loop()
+
             let levels = []
             let levelNumber = 1
             let maxLevel = 0
@@ -58,6 +64,8 @@ window.addEventListener('DOMContentLoaded', (event) => {
             let hasLvLRestartNM = false
             let hasLvLRestartIM = false
             let restartIM = false
+
+            bgMusic.play()
 
             function changeLevel(levelNumber){
                 levels.length = 0
@@ -134,6 +142,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             })
 
             nextLvL.addEventListener('click', function changeMode() {
+                buttonClickSound.play()
                 if(nMode == true){
                     levelNumber = levelNumber + 1
                     changeLevel(levelNumber)
@@ -1148,6 +1157,27 @@ window.addEventListener('DOMContentLoaded', (event) => {
     function getRandomColor(p){
         var randomNumber=Math.floor(Math.random()*5)
         return `rgb(${p[randomNumber][0]},${p[randomNumber][1]},${p[randomNumber][2]})`
+    }
+
+    function sound(src) {
+        this.sound = document.createElement("audio");
+        this.sound.src = src;
+        this.sound.setAttribute("preload", "auto");
+        this.sound.setAttribute("controls", "none");
+        this.sound.style.display = "none";
+        document.body.appendChild(this.sound);
+        this.play = function(){
+          this.sound.play();
+        }
+        this.stop = function(){
+          this.sound.pause();
+        }
+        this.volume = function(vol){
+            this.sound.volume = vol;
+        }
+        this.loop = function(){
+            this.sound.loop = true;
+        }
     }
 
     http.open("POST", url, true);

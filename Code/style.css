@@ -9,11 +9,15 @@ body{
 }
 
 
+.particles-js-canvas-el{
+    position:absolute;
+
+}
 
 #center{
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
+    width: 50%;
+    height:50%;
+    margin: 0 auto;
 }
 
 #menu{

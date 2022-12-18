@@ -1,0 +1,39 @@
+{
+    "particles": {
+      "number": {
+        "value": 40
+      },
+      "color": {
+        "value": "#ffffff"
+      },
+      "shape": {
+        "type": "circle"
+      },
+      "size": {
+        "value": 4,
+        "random": true
+      },
+      "line_linked": {
+        "enable": false
+      },
+      "opacity":{
+        "value":0.3
+      },
+      "move": {
+        "enable": true,
+        "speed": 0.5,
+        "random": true
+      }
+    },
+    "interactivity": {
+      "detect_on": "canvas",
+      "events": {
+        "onhover": {
+          "enable": false
+        },
+        "onclick": {
+          "enable": false
+        }
+      }
+    }
+  }
