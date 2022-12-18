@@ -798,7 +798,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                         draw(){
                             canvasNM_context.shadowColor = this.shadowColor
                             canvasNM_context.shadowBlur = this.shadowBlur
-                            canvasNM_context.lineWidth = 2
+                            canvasNM_context.lineWidth = 4
                             canvasNM_context.fillStyle = 'transparent'
                             canvasNM_context.strokeStyle = this.color
                             canvasNM_context.fillRect(this.x + this.width/6, this.y + this.height/6, this.width/1.5, this.height/1.5)
@@ -823,9 +823,9 @@ window.addEventListener('DOMContentLoaded', (event) => {
                         }
         
                         draw(){
-                            canvasNM_context.shadowBlur = 1
+                            canvasNM_context.shadowBlur = 2
                             canvasNM_context.shadowColor = 'black'
-                            canvasNM_context.lineWidth = 1
+                            canvasNM_context.lineWidth = 2
                             canvasNM_context.strokeStyle = this.color
                             canvasNM_context.beginPath()
                             canvasNM_context.arc(this.x, this.y, this.radius, 0, (Math.PI*2), true)
