@@ -49,6 +49,10 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
             let buttonClickSound = new sound("buttonClick.wav")
             buttonClickSound.volume(0.3)
+            let collectingSound = new sound("ball_collect.wav")
+            collectingSound.volume(0.3)
+            let collectingSound2 = new sound("ball_collect2.wav")
+            collectingSound2.volume(0.3)
             let bgMusic = new sound("bgMusic.wav")
             bgMusic.volume(0.3)
             bgMusic.loop()
@@ -92,8 +96,19 @@ window.addEventListener('DOMContentLoaded', (event) => {
             windowWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth
             windowHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight
 
+            let particlesNM = document.querySelector('.particlesNM')
+            let particlesIM = document.querySelector('.particlesIM')
+
+            particlesIM.removeAttribute('id')
+            
+
             let menu = document.getElementById('menu')
             let menuN = document.getElementById('menuN')
+            let menuI = document.getElementById('menuI')
+
+            menuI.style.display = 'none'
+
+           
 
             let canvasIM = document.getElementById('canvasIM')
             let canvasNM = document.getElementById('canvasNM')
@@ -111,26 +126,45 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
             let nMode = true
 
+            let particlesLoaded = false
+
             mode.addEventListener('click', function changeMode() {
+                buttonClickSound.play()
                 if(mode.textContent == 'Normal Mode'){
                     mode.textContent = 'Infinite Mode'
                     nMode = false
                     canvasNM.style.display = 'none'
                     canvasIM.style.display = 'block'
                     menuN.style.display = 'none'
+                    menuI.style.display = 'block'
+                    nextLvL.style.display = 'block'
                     nextLvL.textContent = 'New Level'
                     previousLvL.style.display = 'none'
+                    particlesNM.removeAttribute('id')
+                    particlesIM.setAttribute('id', 'particles-js')
+
+                    if(particlesLoaded == false){
+                        particlesJS.load('particles-js', 'particles.json', function(){
+                            console.log('particles.json loaded....')
+                        })
+
+                        particlesLoaded = true
+                    }
                 }else{
                     mode.textContent = 'Normal Mode'
                     nMode = true
                     canvasNM.style.display = 'block'
                     canvasIM.style.display = 'none'
                     menuN.style.display = 'block'
+                    menuI.style.display = 'none'
                     nextLvL.textContent = 'Next Level'
+                    particlesIM.removeAttribute('id')
+                    particlesNM.setAttribute('id', 'particles-js')
                 }
             })
 
             restart.addEventListener('click', function changeMode() {
+                buttonClickSound.play()
                 if(nMode == true){
                     //hasLvLRestartNM = true
                     hasLevelChangedNM = true
@@ -155,6 +189,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             })
 
             previousLvL.addEventListener('click', function changeMode() {
+                buttonClickSound.play()
                 levelNumber = levelNumber - 1
                 changeLevel(levelNumber)
                 hasLevelChangedNM = true
@@ -643,6 +678,8 @@ window.addEventListener('DOMContentLoaded', (event) => {
                                                     if(this.grid.blocks[i].hit){
                                                         this.circles[j].color = 'transparent'
                                                         objCount++
+                                                        collectingSound.play()
+                                                        collectingSound2.play()
                                                         this.grid.blocks[i].hit = false
                                                     }
                                                 }
@@ -662,8 +699,9 @@ window.addEventListener('DOMContentLoaded', (event) => {
                 
                 window.setInterval(function(){
                     if(nMode == false){
-                        menu.height = (windowHeight - canvasIM.height)/3
+                        menu.height = windowHeight - 30
                         menu.style.height = menu.height + 'px'
+                        menu.style.alignItems = 'flex-end'
 
                         board.draw()
                         objective.draw()
@@ -673,6 +711,9 @@ window.addEventListener('DOMContentLoaded', (event) => {
             }
             
             function normalMode () {
+
+                menuN.height = canvasIM.height + menu.height + 10
+                menuN.style.height = menuN.height + 'px'
 
                 let canvasNM_context = canvasNM.getContext('2d')
     
@@ -829,6 +870,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
                         if(hasLvLRestartNM){
                             obj = 0
+                            objCount = 0
 
                             for(let i = 0; i<levels.length; i++){
   
@@ -1090,6 +1132,9 @@ window.addEventListener('DOMContentLoaded', (event) => {
                                                     if(this.grid.blocks[i].hit){
                                                         this.circles[j].color = 'transparent'
                                                         objCount++
+                                                        console.log(collectingSound)
+                                                        collectingSound.play()
+                                                        collectingSound2.play()
                                                         this.grid.blocks[i].hit = false
                                                     }
                                                 }
@@ -1108,8 +1153,9 @@ window.addEventListener('DOMContentLoaded', (event) => {
     
                 window.setInterval(function(){
                     if(nMode){
-                        menuN.height = canvasIM.height + menu.height + 10
-                        menuN.style.height = menuN.height + 'px'
+                        menu.height = (windowHeight - canvasIM.height)/3
+                        menu.style.height = menu.height + 'px'
+                        menu.style.alignItems = 'center'
                         
                         if(levelNumber > levels.length + 1){
                             levelNumber = levelNumber - 1
