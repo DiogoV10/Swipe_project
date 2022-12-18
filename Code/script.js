@@ -51,7 +51,8 @@ window.addEventListener('DOMContentLoaded', (event) => {
             let levels = []
             let levelNumber = 1
             let hasLevelChanged = false
-            let hasLvLStateChanged = false
+            let hasLvLStateChangedNM = false
+            let hasLvLStateChangedIM = false
 
             function changeLevel(levelNumber){
                 levels.length = 0
@@ -105,7 +106,8 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     levelNumber = levelNumber + 1
                     changeLevel(levelNumber)
                     hasLevelChanged = true
-                    hasLvLStateChanged = true
+                    hasLvLStateChangedNM = true
+                    hasLvLStateChangedIM = true
  
                 }else{
                     mode.textContent = 'Normal Mode'
@@ -155,7 +157,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                 let obj = 0
                 let objCount = 0
     
-                canvasIM.style.background = '#000000'
+                canvasIM.style.background = 'transparent'
     
                 class Rectangle {
                     constructor(x, y, height, width, color, objective){
@@ -177,8 +179,8 @@ window.addEventListener('DOMContentLoaded', (event) => {
                         canvasIM_context.shadowColor = this.shadowColor
                         canvasIM_context.shadowBlur = this.shadowBlur
                         canvasIM_context.lineWidth = 2
-                        canvasIM_context.fillStyle = this.color
-                        canvasIM_context.strokeStyle = 'grey'
+                        canvasIM_context.fillStyle = 'transparent'
+                        canvasIM_context.strokeStyle = this.color
                         canvasIM_context.fillRect(this.x + this.width/6, this.y + this.height/6, this.width/1.5, this.height/1.5)
                         canvasIM_context.strokeRect(this.x + this.width/6, this.y + this.height/6, this.width/1.5, this.height/1.5)
                     }
@@ -201,13 +203,16 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     }
     
                     draw(){
-                        canvasIM_context.lineWidth = 2 //Change stroke width
+                        canvasIM_context.shadowBlur = 1
+                        canvasIM_context.shadowColor = 'black'
+                        canvasIM_context.lineWidth = 1 //Change stroke width
                         canvasIM_context.strokeStyle = this.color
                         canvasIM_context.beginPath()
                         canvasIM_context.arc(this.x, this.y, this.radius, 0, (Math.PI*2), true)
-                        canvasIM_context.fillStyle = this.color //Can be removed for now (better keep it until the end)
-                        canvasIM_context.fill() //Can be removed for now (better keep it until the end)
+                        //canvasIM_context.fillStyle = this.color //Can be removed for now (better keep it until the end)
+                        //canvasIM_context.fill() //Can be removed for now (better keep it until the end)
                         canvasIM_context.stroke()
+                        canvasIM_context.closePath()
                     }
     
                     move(){
@@ -256,8 +261,22 @@ window.addEventListener('DOMContentLoaded', (event) => {
                             this.x = 0
                         }
                     }
+                    saveLevelState(){
+                        if(hasLvLStateChangedIM){
+                            let canvas
+
+                            canvas = this.blocks
+
+                            canvasIM_context.clearRect(0, 0, canvasIM.width, canvasIM.height);
+
+                            this.blocks = canvas
+
+                            hasLvLStateChangedIM = false
+                        }                  
+                    }
     
                     draw(){
+                        this.saveLevelState()
                         for(let i = 0; i<this.blocks.length; i++){
                             this.blocks[i].draw()
                         }
@@ -303,13 +322,20 @@ window.addEventListener('DOMContentLoaded', (event) => {
                     }
     
                     draw(){
+                        this.control()
                         this.body.x = this.location.x + this.location.width/2
                         this.body.y = this.location.y + this.location.height/2
                         this.body.draw()
-                        this.control()
                     }
     
                     control(){
+                        if(moving == false){
+                            moveDown = false
+                            moveLeft = false
+                            moveRight = false
+                            moveUp = false
+                        }
+
                         if(keysPressed['w']){
                             if(moving == false){
                                 moveDown = false
@@ -352,15 +378,19 @@ window.addEventListener('DOMContentLoaded', (event) => {
                         }
     
                         if(moveUp){
+                            hasLvLStateChangedIM = true
                             this.body.y -= this.grid.height
                         }
                         if(moveLeft){
+                            hasLvLStateChangedIM = true
                             this.body.x -= this.grid.width
                         }
                         if(moveDown){
+                            hasLvLStateChangedIM = true
                             this.body.y += this.grid.height
                         }
                         if(moveRight){
+                            hasLvLStateChangedIM = true
                             this.body.x += this.grid.width
                         }
                         
@@ -415,16 +445,27 @@ window.addEventListener('DOMContentLoaded', (event) => {
                             let circle
                             let location
                             
+                            circle = new Circle(0,0,Math.min(this.grid.width/3.5, this.grid.height/3.5), 'transparent')
+                            location = this.grid.blocks[i]
+
                             if(this.grid.blocks[i].objective){
-                                circle = new Circle(0,0,Math.min(this.grid.width/3.5, this.grid.height/3.5), 'blue')
-                                location = this.grid.blocks[i]
-    
-                                this.circles.push(circle)
-                                this.locations.push(location)
+                                circle.color = 'blue'
                             } 
+                            this.circles.push(circle)
+                            this.locations.push(location)
+                        }
+                    }
+                    level(){
+                        for(let i = 0; i<this.grid.blocks.length; i++){
+                            if(this.grid.blocks[i].objective){
+                                this.circles[i].color = 'blue'
+                            }else{
+                                this.circles[i].color = 'transparent'
+                            }
                         }
                     }
                     draw(){
+                        this.level()
                         for(let i = 0; i<this.circles.length; i++){
                             this.circles[i].x = this.locations[i].x + this.locations[i].width/2
                             this.circles[i].y = this.locations[i].y + this.locations[i].height/2
@@ -487,7 +528,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                 let obj = 0
                 let objCount = 0
     
-                canvasNM.style.background = '#000000'
+                canvasNM.style.background = 'transparent'
     
                 class Rectangle {
                     constructor(x, y, height, width, color, objective){
@@ -585,7 +626,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                         }
                     }
                     saveLevelState(){
-                        if(hasLvLStateChanged){
+                        if(hasLvLStateChangedNM){
                             let canvas
 
                             canvas = this.blocks
@@ -594,7 +635,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
                             this.blocks = canvas
 
-                            hasLvLStateChanged = false
+                            hasLvLStateChangedNM = false
                         }                  
                     }
 
@@ -743,19 +784,19 @@ window.addEventListener('DOMContentLoaded', (event) => {
                         }
     
                         if(moveUp){
-                            hasLvLStateChanged = true
+                            hasLvLStateChangedNM = true
                             this.body.y -= this.grid.height
                         }
                         if(moveLeft){
-                            hasLvLStateChanged = true
+                            hasLvLStateChangedNM = true
                             this.body.x -= this.grid.width
                         }
                         if(moveDown){
-                            hasLvLStateChanged = true
+                            hasLvLStateChangedNM = true
                             this.body.y += this.grid.height
                         }
                         if(moveRight){
-                            hasLvLStateChanged = true
+                            hasLvLStateChangedNM = true
                             this.body.x += this.grid.width
                         }
                         
