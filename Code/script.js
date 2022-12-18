@@ -74,7 +74,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                 let bgMusic = new sound("bgMusic.wav")
                 bgMusic.volume(0.3)
                 bgMusic.loop()
-    
+
                 let levels = []
                 let levelNumber = 1
                 let levelsCount = 0
@@ -305,7 +305,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
                         draw(){
                             canvasIM_context.shadowColor = this.shadowColor
                             canvasIM_context.shadowBlur = this.shadowBlur
-                            canvasIM_context.lineWidth = 2
+                            canvasIM_context.lineWidth = 4
                             canvasIM_context.fillStyle = 'transparent'
                             canvasIM_context.strokeStyle = this.color
                             canvasIM_context.fillRect(this.x + this.width/6, this.y + this.height/6, this.width/1.5, this.height/1.5)
@@ -330,9 +330,9 @@ window.addEventListener('DOMContentLoaded', (event) => {
                         }
         
                         draw(){
-                            canvasIM_context.shadowBlur = 1
+                            canvasIM_context.shadowBlur = 2
                             canvasIM_context.shadowColor = 'black'
-                            canvasIM_context.lineWidth = 1
+                            canvasIM_context.lineWidth = 2
                             canvasIM_context.strokeStyle = this.color
                             canvasIM_context.beginPath()
                             canvasIM_context.arc(this.x, this.y, this.radius, 0, (Math.PI*2), true)
@@ -1242,10 +1242,11 @@ window.addEventListener('DOMContentLoaded', (event) => {
                         }
                     }, 10)
                 }
-    
+                
                 infiniteMode()
                 normalMode()
-    
+
+                alert('Press W/A/S/D once to move the white circle')
             }
 
             if(x == 1){
